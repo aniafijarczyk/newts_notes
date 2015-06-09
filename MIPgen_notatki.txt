@@ -1,0 +1,46 @@
+
+MIPgen
+
+First!:
+-all references in one file
+-index references: 		bwa index references.fa
+-bgzip vcf file: 		bgzip snps.flt_2000.vcf
+-index vcf file with tabix: 	tabix snps.flt_2000.vcf.gz
+
+
+The capture sizes (target + arms) is minimum 120
+For mips of target size 112bp with both arms equal 40bp, the capture size has to be set to 152
+It seems to be good to set capture size from 140 to 160, and arms of size 40, then the target is minimum 100 and maximum 120. The bigger scope of capture sizes, the more mips are designed.
+
+If the maximum capture size is 160, than the searching space around the mip increases to 159bp (in such case there is 1 bp overlap with the exon). 
+So it is important to set start of the first and stop of the last exon in the chromosome >159 bp further from the beginning or the end of the chromosome.
+Now the progrma works fine, only use genome_dir option to specify the forlder with all reference 
+
+Use logistic scoring (necessary, otherwise it searches large regions outside exons, dont want that)
+
+Minimum advisable score is 0.6.
+
+The program searches 75 to 150bp around exon depending on the capture size (the smaller capture size, the smaller searching space).
+Its good to move exon start and stop boundaries, even up to 50bp if possible. ***Need to do a script for that***. The region in the bed file can be even few bp long. Thats not a problem.
+
+
+I use -double_tile_strand_unaware on and -capture_increment 1. I think it helps, at least the first one. There is more designed mips to choose from.
+
+***Need a script for filtering mips***. Pick only those which fit the exon boundaries (+-2bp max). Pick those which overlap the least and cover most scpace.
+1) pick mips which do not exceed exon boundaries
+2) for each base pick one mip with highest score
+
+Comman line:
+$mipgen_dir/mipgen 
+-regions_to_scan reference.bed 
+-common_snps off 
+-snp_file snps.flt_2000.vcf.gz
+-project_name ./$name 
+-min_capture_size 140 
+-max_capture_size 160 
+-double_tile_strand_unaware on 
+-capture_increment 1 
+-bwa_genome_index $ref_dir/chrall.fa 
+-arm_length_sums 40
+-genome_dir ./references
+

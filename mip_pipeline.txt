@@ -1,0 +1,76 @@
+######################################################
+############			      ################
+############        MIP PIPELINE      ################
+############			      ################
+######################################################
+
+
+1. import all the scripts and additional fileS needed from http://krishna.gs.washington.edu/mip_pipeline/
+
+apply_scoring_matrix_in_place4.py*
+bad_junctions.txt*
+build.sh*
+calculate_baseline_coverage_probes.pl*
+collapse_exon_file.pl*
+count_mips_design_character.pl*
+design_all_mips_joe1.pl*
+design_all_mips_joe2.pl*
+design_all_mips.pl*
+generate_70mers2.py*
+generate_ucsc_track_colors.py*
+generate_ucsc_track.py*
+genome_compare*
+genome_compare.cpp*
+get_design_region.pl*
+get_region_exons.pl*
+makeBedFromList.py*
+makeRunMipDesignShellScript2.py*
+pick_mips3.pl*
+pick_mips4_double_up_on_small_BJO.pl*
+pick_mips4_double_up_on_small.pl*
+redesign_mips_with_snps.pl*
+scoring_matrix_v4.txt.csv*
+uniformity_functions.py*
+
+WARNING!
+'genome_compare' may not work; import from http://krishna.gs.washington.edu/mip_pipeline/genome_compare_distrib/ 'genome_compare.cpp' and 'build.sh'; in 'genome_compare.cpp' add two libraries in the beginning:
+#include <cstdio>
+#include <cstring>
+and compile with build.sh
+
+2. change permissions for all files (chmod 777 *.*)
+
+3. make a reference for each marker from alignment files
+
+put all markers (their alignments) separately in one folder,
+python 'make_reference.py', reads all *.fasta files in the current directory,
+WARNING! reference names will start with 'chr' and reference files will have .fa extension (i think its needed)
+put them in one folder, 'references'
+
+4. prepare dbSNP file
+
+python 'mip_dbsnp.py', can be in the folder with fasta files with alignments and references, (references/); the input are all '*.fasta' files with alignments in the current directory and 'chr*.fa' files with references; output files are: i) 'dbSNP.rod' with all snips, you can specify some things in the file, e.g. function, strand, moleculeType, but I dont think it is really necessary, the script ignores singletons (other variants, e.g. indels are not considered), ii) 'paths_to_fasta_files.txt': file with listed paths to the reference files, iii) '*.bed' file with reference name, start and stop positions of exons (by default it puts the first (0) and the last base of the ref sequence)
+
+warning:
+for UTRs: in bed files change start and stop position in excell: start position +5 and stop position -5, mips that fall outside the limits of a sequence will get low score (to be confident: start+20, stop-20)
+
+5. run MIP pipeline
+
+copy file with paths, dbSNP.rod file and .bed file to the folder with 'MIP_workflow.sh' script,
+use 'MIP_workflow.sh', adjust the paths to scripts and files, the output with all designed probes is '*_70mers.txt', the prefix (*), pathes, filenames, and program otions can be specified in 'MIP_workflow.sh'
+
+
+6. find diagnostic snips in UTR or SNP markers and find them in the probes
+
+first find in alignments diagnostic snps between populations (python <'diagnostic_snps.py'>), populations should be defined in 'samples.dat' file, diagnostic snips are in at least >= 0.9 of samples in the pop; reads all '*.fasta' files, the output is 'dbSNP_diagnostic', you can filter the output depending if you want 'diagnostic', 'diagnostic_snp' or just non-diagnostic 'snp'
+
+python 'mips_with_snips.py' <'dbSNP_diagnostic'> <'*_70mers.txt'>, diagnostic or whichever positions are in 'dbSNP_diagnostic' file will be added to '*_70mers.txt' file
+
+
+
+
+
+
+
+
+
